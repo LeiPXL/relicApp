@@ -40,6 +40,8 @@ for(var relic of relics) {
     }
     averagePlat = Math.round((total/size) * 100) / 100
 
+    if (!relicDict[relic[0]]) relicDict[relic[0]] = {};
+
     // relicDict[relic[0]].profit = 0;
     // relicDict[relic[0]].expectedValue = 0;
     relicDict[relic[0]].price = averagePlat;
