@@ -1,9 +1,10 @@
 import fs from "fs/promises";
 
-const relics = JSON.parse(await fs.readFile("relics.json"));
+/// Change this variable depending on the amount of friends participating in the relic opening. If you're alone players should be 1
+let players = 1
+
 const relicDict = JSON.parse(await fs.readFile("relicDict.json"));
 const folders = await fs.readdir("./relics");
-const relicEVDict = {};
 const relicRadiances = {"Intact": 0, "Exceptional": 0, "Flawless": 0, "Radiant": 0};
 
 // Get Relic Folder
@@ -14,58 +15,65 @@ for (const folder of folders) {
         const content = await fs.readFile(`./relics/${folder}/${file}`, "utf-8");
         const json = JSON.parse(content);
         const relicSlug = `${json.tier.toLowerCase()}_${json.name.toLowerCase()}_relic`;
-        let cost;
+        let price;
         if(relicDict[`${json.tier.toLowerCase()}_${json.name.toLowerCase()}_relic`] === "Not Being Sold.") {
             continue
 
         } else {
-            cost = relicDict[`${json.tier.toLowerCase()}_${json.name.toLowerCase()}_relic`];
+            price = relicDict[relicSlug].price;
 
         }
         // Get Radiance
+        console.log(relicSlug)
         for (let relicRadiance of Object.keys(relicRadiances)) {
-            let totalValue = 0;
-            let formaCount =0;
+            let expectedValue = 0;
+            let formaCount = 0;
             // Get Drop
             for (let i = 0; i < json.rewards.Intact.length; i++) {
-                let itemSlug = json.rewards.Intact[i].itemName.toLowerCase().replaceAll(" ", "_").replaceAll("&","and");
+                var itemName = json.rewards.Intact[i].itemName;
+                var lowerName = itemName.toLowerCase();
+                var itemSlug = lowerName.replaceAll(" ", "_").replaceAll("&","and")
                 if (json.rewards.Intact[i].itemName.includes("Forma Blueprint")) {
                     formaCount++
                     continue
                 }
-                let expectedItemValue = relicDict[relicSlug].drops[itemSlug];
-                // console.log(itemSlug + " " + relicRadiance + " " + expectedItemValue)
+                let itemValue = relicDict[relicSlug].drops[itemName];
+                // console.log(itemSlug + " " + relicRadiance + " " + itemValue)
 
-                totalValue += (expectedItemValue*(json.rewards[relicRadiance][i].chance));
-            }
-            totalValue = 2*Math.round(totalValue)/100
-            let profit = Math.round((totalValue - cost)*100)/100
-
-            relicEVDict[`${json.tier} ${json.name} ${relicRadiance}`] = { expectedValue : totalValue, relicCost : cost , averageProfit: profit, forma: formaCount};
-
-            const bestRelics = {};
-
-            for (const [key, data] of Object.entries(relicEVDict)) {
-                // split off the last word ("Intact", "Exceptional", "Flawless", "Radiant")
-                const parts = key.split(" ");
-                const baseName = parts.slice(0, -1).join(" ");
-
-                if (!bestRelics[baseName] || data.averageProfit > bestRelics[baseName].data.averageProfit) {
-                    bestRelics[baseName] = { key, data };
-                }
+                expectedValue += (itemValue * (json.rewards[relicRadiance][i].chance));
             }
 
-// 2. Convert to array and sort by highest profit
-            const sortedEVDict = Object.values(bestRelics)
-                .sort((a, b) => b.data.averageProfit - a.data.averageProfit)
-                .map(item => ({ [item.key]: item.data }));
 
 
-            await fs.writeFile("sortedEVDict.json", JSON.stringify(sortedEVDict, null, 2));
-            await fs.writeFile("relicEVDict.json", JSON.stringify(relicEVDict, null, 2));
+
+            expectedValue = Math.round(players*expectedValue - 2*(players-1))/100
+
+
+
+            let profit = Math.round((expectedValue - price) * 100) / 100
+            // console.log(`profit: ${profit}, expectedValue: ${expectedValue}, price: ${price}`)
+            relicDict[relicSlug].profit = profit;
+            relicDict[relicSlug].expectedValue = expectedValue;
+
+            
+            
+
+            function sortRelicsByProfit(data) {
+                return Object.fromEntries(
+                    Object.entries(data)
+                        // remove relics with null price
+                        .filter(([_, relic]) => relic.price !== null)
+                        // sort by profit (descending)
+                        .sort(([, a], [, b]) => b.profit - a.profit)
+                );
+            }
+            let sortedRelicDict = sortRelicsByProfit(relicDict)
+
+            
+            
+            await fs.writeFile("relicDict.json", JSON.stringify(relicDict, null, 2));
+            await fs.writeFile("sortedRelicDict.json", JSON.stringify(sortedRelicDict, null, 2));
+
         }
-
-
-
     }
 }
