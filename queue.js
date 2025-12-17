@@ -1,6 +1,6 @@
 
 const RATE = 3
-const INTERVAL = 1100;
+const INTERVAL = 220;
 export const queue = [];
 
 
@@ -17,6 +17,6 @@ setInterval(async () =>{
 
         sendReq(base, path)
             .then(resolve)
-            .then(reject);
+            .catch(reject);
     }
 }, INTERVAL);

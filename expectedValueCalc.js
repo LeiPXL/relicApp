@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 
 /// Change this variable depending on the amount of friends participating in the relic opening. If you're alone players should be 1
-let players = 1
+let players = 2
 
 const relicDict = JSON.parse(await fs.readFile("relicDict.json"));
 const folders = await fs.readdir("./relics");
@@ -12,10 +12,13 @@ for (const folder of folders) {
     const files = await fs.readdir(`./relics/${folder}`);
     // Get Relic
     for (const file of files) {
+
         const content = await fs.readFile(`./relics/${folder}/${file}`, "utf-8");
         const json = JSON.parse(content);
         const relicSlug = `${json.tier.toLowerCase()}_${json.name.toLowerCase()}_relic`;
         let price;
+        let radianceDict = {};
+
         if(relicDict[`${json.tier.toLowerCase()}_${json.name.toLowerCase()}_relic`] === "Not Being Sold.") {
             continue
 
@@ -52,11 +55,14 @@ for (const folder of folders) {
 
             let profit = Math.round((expectedValue - price) * 100) / 100
             // console.log(`profit: ${profit}, expectedValue: ${expectedValue}, price: ${price}`)
+
+
+            relicDict[relicSlug].radiance = relicRadiance;
             relicDict[relicSlug].profit = profit;
             relicDict[relicSlug].expectedValue = expectedValue;
 
-            
-            
+            radianceDict[relicRadiance] = { ...relicDict[relicSlug]}
+            // console.log(relicRadiance + ": " + relicDict[relicSlug].profit)
 
             function sortRelicsByProfit(data) {
                 return Object.fromEntries(
@@ -75,5 +81,10 @@ for (const folder of folders) {
             await fs.writeFile("sortedRelicDict.json", JSON.stringify(sortedRelicDict, null, 2));
 
         }
+        // console.log(radianceDict)
+        relicDict[relicSlug] = Object.values(radianceDict).reduce(
+            (best, current) => current.profit > best.profit ? current : best
+        );
+        console.log("Best: " + relicDict[relicSlug].radiance + " " + relicDict[relicSlug].profit)
     }
 }

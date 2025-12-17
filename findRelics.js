@@ -36,18 +36,14 @@ for(var relic of relics) {
 
     if (!relicDict[relic[0]]) {
         relicDict[relic[0]] = {};
+        relicvDict[relic[0]].radiance = ""
         relicDict[relic[0]].profit = NaN;
         relicDict[relic[0]].expectedValue = NaN;
-        relicDict[relic[0]].price = NaN;
+        relicDict[relic[0]].price = averagePlat;
         relicDict[relic[0]].forma = NaN;
+    } else {
+        relicDict[relic[0]].price = averagePlat;
     }
-
-    // relicDict[relic[0]].profit = 0;
-    // relicDict[relic[0]].expectedValue = 0;
-    relicDict[relic[0]].price = averagePlat;
-    // relicDict[relic[0]].forma = 0;
-
-
     console.log(relic[1] + "'s average Value: " + averagePlat);
 }
 
