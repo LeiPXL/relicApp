@@ -53,4 +53,3 @@ fs.writeFileSync("relics.json", JSON.stringify(relics, null, 2));
 fs.writeFileSync("relicDict.json", JSON.stringify(relicDict, null, 2));
 
 console.log("---------------  All relics fetched!  ---------------")
-stop();

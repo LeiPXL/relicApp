@@ -1,0 +1,6 @@
+#General
+/.idea/
+#relicApp
+/relics.json
+/relicDict.json
+/sortedRelicDict.json
