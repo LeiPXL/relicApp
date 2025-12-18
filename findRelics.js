@@ -36,7 +36,7 @@ for(var relic of relics) {
 
     if (!relicDict[relic[0]]) {
         relicDict[relic[0]] = {};
-        relicvDict[relic[0]].radiance = ""
+        relicDict[relic[0]].radiance = ""
         relicDict[relic[0]].profit = NaN;
         relicDict[relic[0]].expectedValue = NaN;
         relicDict[relic[0]].price = averagePlat;
