@@ -85,6 +85,6 @@ for (const folder of folders) {
         relicDict[relicSlug] = Object.values(radianceDict).reduce(
             (best, current) => current.profit > best.profit ? current : best
         );
-        console.log("Best: " + relicDict[relicSlug].radiance + " " + relicDict[relicSlug].profit)
+        // console.log("Best: " + relicDict[relicSlug].radiance + " " + relicDict[relicSlug].profit)
     }
 }
